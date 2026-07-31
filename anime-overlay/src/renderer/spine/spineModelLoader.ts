@@ -5,7 +5,7 @@ import { BonePhysics } from "./bonePhysics";
 
 export class SpineModelLoader {
   private static readonly NIKKE_BASE = "https://nikke-db-legacy.pages.dev/l2d/";
-  private static readonly DOTGG_BASE = "https://codeberg.org/alesha229/nikke/src/branch/main";
+  private static readonly DOTGG_BASE = "https://nikke-db-legacy.pages.dev/l2d/";
   
   public nikkeIndexData: any = null;
   public nikkie4IndexData: any = null;
@@ -276,7 +276,7 @@ export class SpineModelLoader {
           const characterName = parts[0];
           const skinName = parts.slice(1).join("_");
 
-          const baseUrl = "https://codeberg.org/alesha229/nikke/raw/branch/main";
+          const baseUrl = SpineModelLoader.NIKKE_BASE;
           const altSkelUrl = `${baseUrl}/${encodeURIComponent(characterName)}/${encodeURIComponent(skinName)}.skel`;
           const altAtlasUrl = `${baseUrl}/${encodeURIComponent(characterName)}/${encodeURIComponent(skinName)}.atlas`;
 
@@ -338,7 +338,7 @@ export class SpineModelLoader {
           subfolder = "cover/";
         }
         
-        const baseUrl = "https://codeberg.org/alesha229/nikke/raw/branch/main";
+        const baseUrl = SpineModelLoader.NIKKE_BASE;
         const atlasUrl = `${baseUrl}/${encodeURIComponent(characterName)}/${subfolder}${encodeURIComponent(skinName)}.atlas`;
         const skelUrl = `${baseUrl}/${encodeURIComponent(characterName)}/${subfolder}${encodeURIComponent(skinName)}.skel`;
 

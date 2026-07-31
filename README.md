@@ -1,4 +1,4 @@
-## Anime Helper — Live2D ассистент для VS Code
+## Anime-Assistant — Live2D ассистент для VS Code
 
 > Быстрый запуск: нажмите `Ctrl`+`Shift`+`P` (на macOS — `Cmd`+`Shift`+`P`), введите и выберите команду «Аниме: Показать модель», затем нажмите `Enter`.
 
@@ -12,7 +12,7 @@
 
 ### Демо
 
-![Демо](https://raw.githubusercontent.com/alesha229/anime-helper/ad5cd3e294612c6097ae72276292f562deda3488/demo.gif)
+![Демо](./anime-overlay/public/img/demo.gif)
 
 ### Быстрый старт
 

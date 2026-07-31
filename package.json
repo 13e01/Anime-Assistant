@@ -1,18 +1,18 @@
 {
-  "name": "anime-helper",
-  "displayName": "anime-helper",
-  "description": "anime-helper",
+  "name": "anime-assistant",
+  "displayName": "Anime-Assistant",
+  "description": "Anime-Assistant",
   "icon": "icon.png",
   "version": "0.0.10",
-  "publisher": "anime-helper",
+  "publisher": "anime-assistant",
   "private": true,
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/alesha229/anime-helper"
+    "url": ""
   },
   "bugs": {
-    "url": "https://github.com/alesha229/anime-helper/issues"
+    "url": ""
   },
   "engines": {
     "vscode": "^1.100.0"
