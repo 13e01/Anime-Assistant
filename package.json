@@ -35,7 +35,9 @@
     "lint": "eslint",
     "watch": "tsc -watch -p ./"
   },
-  "dependencies": {},
+  "dependencies": {
+    "cowsay": "^1.6.0"
+  },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
     "@stylistic/eslint-plugin": "^2.9.0",
