@@ -1,7 +1,7 @@
 {
   "name": "anime-assistant",
-  "displayName": "Anime-Assistant",
-  "description": "Anime-Assistant",
+  "displayName": "Аниме‑ассистент",
+  "description": "Аниме‑ассистент — Live2D помощник для VS Code",
   "icon": "icon.png",
   "version": "0.0.10",
   "publisher": "anime-assistant",
