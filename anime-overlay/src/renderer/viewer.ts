@@ -703,14 +703,10 @@ function initBackButton() {
     try {
       const node = pathMap[path || ""];
       const files: string[] = (node && node.files) || [];
-      for (const f of files) {
-        if (
-          /\.(png|jpe?g|webp)$/i.test(f) &&
-          /(thumbnail|thumb|preview)/i.test(f)
-        ) {
-          return f;
-        }
-      }
+      const images = files.filter((f) => /\.(png|jpe?g|webp)$/i.test(f));
+      const preferred = images.filter((f) => /(thumbnail|thumb|preview)/i.test(f));
+      if (preferred.length) return preferred[0];
+      if (images.length) return images[0];
       // also try one level deeper (any child folder) for previews
       const children = (node && node.children) || [];
       for (const ch of children) {
@@ -718,14 +714,14 @@ function initBackButton() {
         const childNode = pathMap[childPath] || {};
         const childFiles: string[] =
           (childNode && (childNode as any).files) || [];
-        for (const f of childFiles) {
-          if (
-            /\.(png|jpe?g|webp)$/i.test(f) &&
-            /(thumbnail|thumb|preview)/i.test(f)
-          ) {
-            return ch.name + "/" + f;
-          }
-        }
+        const childImages = childFiles.filter((f) =>
+          /\.(png|jpe?g|webp)$/i.test(f)
+        );
+        const childPreferred = childImages.filter((f) =>
+          /(thumbnail|thumb|preview)/i.test(f)
+        );
+        if (childPreferred.length) return ch.name + "/" + childPreferred[0];
+        if (childImages.length) return ch.name + "/" + childImages[0];
       }
     } catch {}
     return null;
@@ -735,8 +731,230 @@ function initBackButton() {
     return pathToJsDelivr(repoPathWithFile, activeRepo().ref);
   }
 
+  function findPreviewForModel(indexPath: string, modelFile: string): string | null {
+    const node = pathMap[indexPath] || {};
+    const files: string[] = node.files || [];
+    const slash = modelFile.lastIndexOf("/");
+    const modelDir = slash >= 0 ? modelFile.slice(0, slash) : "";
+    const sameDir = files.filter(
+      (file) =>
+        file.replace(/\/[^/]+$/, "") === modelDir &&
+        /\.(png|jpe?g|webp)$/i.test(file)
+    );
+    const preferred = sameDir.filter((file) =>
+      /(thumbnail|thumb|preview|icon|portrait|avatar)/i.test(file)
+    );
+    return (preferred[0] || sameDir[0] || null) as string | null;
+  }
+
+  type ModelCatalogEntry = {
+    name: string;
+    family: string;
+    variant: string;
+    path: string;
+    thumbnail: string | null;
+  };
+
+  async function renderModelPreview(
+    entry: ModelCatalogEntry,
+    host: HTMLElement
+  ) {
+    const canvas = document.createElement("canvas");
+    canvas.width = 180;
+    canvas.height = 180;
+    canvas.className = "model-card-preview";
+    host.replaceChildren(canvas);
+
+    const previewApp = new (PIXI as any).Application({
+      view: canvas,
+      transparent: true,
+      width: 180,
+      height: 180,
+      autoStart: true,
+    });
+    try {
+      const modelUrl = pathToRaw(entry.path, activeRepo().ref);
+      const runtime = detectRuntimeByUrl(modelUrl);
+      const settings = await loadSettingsJson(modelUrl, runtime);
+      if (settings.useV4 === true) await ensureCubism4();
+      else await ensureCubism2();
+
+      const ns = settings.useV4
+        ? (window as any).__live2d_api_c4 || (PIXI as any).live2d
+        : (window as any).__live2d_api_c2 || (PIXI as any).live2d;
+      const previousRuntime = (PIXI as any).live2d;
+      (PIXI as any).live2d = ns;
+      let model: any;
+      try {
+        model = await ns.Live2DModel.from(settings.urlOrSettings, {
+          motionPreload: "none",
+        });
+      } finally {
+        (PIXI as any).live2d = previousRuntime;
+      }
+      model.anchor?.set?.(0.5, 0.5);
+      previewApp.stage.addChild(model);
+      model.x = 90;
+      model.y = 105;
+      const bounds = model.getBounds();
+      const scale = Math.min(
+        0.82,
+        160 / Math.max(1, bounds.width),
+        165 / Math.max(1, bounds.height)
+      );
+      model.scale.set(scale);
+      model.__previewApp = previewApp;
+      host.dataset.previewLoaded = "1";
+    } catch (error) {
+      previewApp.destroy?.(true);
+      host.textContent = "Preview unavailable";
+      console.warn("Failed to render model preview", entry.path, error);
+    }
+  }
+
+  function prettifyModelName(value: string): string {
+    const cleaned = value
+      .replace(/\.(model3|model)\.json$/i, "")
+      .replace(/^model3?$/i, "")
+      .replace(/[_-]+/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    return cleaned.replace(/\b\w/g, (letter) => letter.toUpperCase()) || "Unnamed model";
+  }
+
+  function getModelFamily(modelPath: string): string {
+    const parts = modelPath.split("/");
+    const fileName = parts.pop() || "";
+    const directory = parts.pop() || "";
+    const baseName = fileName.replace(/\.(model3|model)\.json$/i, "");
+    const normalized = baseName
+      .replace(/(?:[_ -](?:skin|costume|outfit|dress|version|ver))?[_ -]?\d+$/i, "")
+      .replace(/[_ -](?:a|b|c|d)$/i, "");
+    return normalized || directory || fileName;
+  }
+
+  function collectModelEntries(): ModelCatalogEntry[] {
+    const entries: ModelCatalogEntry[] = [];
+    const seen = new Set<string>();
+
+    for (const key of Object.keys(pathMap)) {
+      const node = pathMap[key] || {};
+      for (const file of (node.files || []) as string[]) {
+        if (!/\.(model3\.json|model\.json)$/i.test(file)) continue;
+        const modelPath = (key ? key + "/" : "") + file;
+        if (seen.has(modelPath)) continue;
+        seen.add(modelPath);
+        const fileName = modelPath.split("/").pop() || modelPath;
+        const modelDir = modelPath.replace(/\/[^/]+$/, "");
+        const thumbnailFile =
+          findPreviewForModel(key, file) ||
+          findThumbnailFileForPath(modelDir);
+        const family = getModelFamily(modelPath);
+        const isVariant = /(?:[_ -](?:skin|costume|outfit|dress|version|ver))?[_ -]?\d+$/i.test(
+          fileName.replace(/\.(model3|model)\.json$/i, "")
+        );
+        entries.push({
+          name: prettifyModelName(fileName),
+          family,
+          variant: isVariant ? "Variant" : "Original",
+          path: modelPath,
+          thumbnail: thumbnailFile
+            ? (thumbnailFile.includes("/")
+              ? (key ? key + "/" : "") + thumbnailFile
+              : (modelDir ? modelDir + "/" : "") + thumbnailFile)
+            : null,
+        });
+      }
+    }
+    return entries.sort((a, b) =>
+      a.family.localeCompare(b.family) || a.path.localeCompare(b.path)
+    );
+  }
+
+  function renderModelCatalog() {
+    if (!listEl) return;
+    const entries = collectModelEntries();
+    listEl.innerHTML = "";
+    for (const entry of entries) {
+      const card = el("div", {
+        className: "card",
+        title: entry.path,
+      });
+      const preview = el("div", {
+        className: "model-card-preview",
+        textContent: "No preview",
+      });
+      let previewNode: HTMLElement = preview;
+      if (entry.thumbnail) {
+        const img = el("img", {
+          className: "model-card-preview",
+          src: buildImageUrl(entry.thumbnail),
+          alt: entry.name,
+          onerror: function (this: HTMLImageElement) {
+            (this as any).onerror = null;
+            this.src = pathToRaw(entry.thumbnail as string, activeRepo().ref);
+          },
+        } as any) as HTMLImageElement;
+        previewNode = img;
+      } else {
+        const previewHost = el("div", {
+          className: "model-card-preview",
+          textContent: "Loading preview...",
+        });
+        previewNode = previewHost;
+        const loadPreview = () => {
+          if (previewHost.dataset.previewRequested) return;
+          previewHost.dataset.previewRequested = "1";
+          void renderModelPreview(entry, previewHost);
+        };
+        if ("IntersectionObserver" in window) {
+          const observer = new IntersectionObserver((records) => {
+            if (!records.some((record) => record.isIntersecting)) return;
+            observer.disconnect();
+            loadPreview();
+          });
+          observer.observe(img);
+        } else {
+          loadPreview();
+        }
+      }
+      card.appendChild(previewNode);
+      card.appendChild(
+        el("div", { className: "model-card-info" }, [
+          el("div", { className: "model-card-name", textContent: entry.name }),
+          el("div", {
+            className: "model-card-variant",
+            textContent: `${prettifyModelName(entry.family)} · ${entry.variant}`,
+          }),
+          el("div", { className: "model-card-path", textContent: entry.path }),
+        ])
+      );
+      (card as any).onclick = async () => {
+        card.style.opacity = "0.6";
+        try {
+          await loadFile(entry.path);
+        } catch (error) {
+          console.error("Failed to preview model", entry.path, error);
+        } finally {
+          card.style.opacity = "1";
+        }
+      };
+      listEl.appendChild(card);
+    }
+    const hint = document.getElementById("catalogHint");
+    if (hint) {
+      hint.textContent = entries.length
+        ? `${entries.length} моделей доступно. Нажмите карточку для предпросмотра.`
+        : "В этом каталоге нет готовых model.json/model3.json файлов.";
+    }
+  }
+
   function listEntries(path: string) {
     if (!listEl) return;
+    if (!path) {
+      renderModelCatalog();
+      return;
+    }
     const node = pathMap[path || ""];
     const dirs = (node && node.children) || [];
     const files = (node && node.files) || [];

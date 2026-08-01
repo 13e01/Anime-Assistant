@@ -47,18 +47,61 @@
         flex: 1;
         overflow: auto;
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
         gap: 8px;
-        width: 100vw;
+        padding: 12px;
+        align-content: start;
       }
       .card {
         border: 1px solid #333;
         border-radius: 6px;
-        padding: 8px;
+        padding: 0;
         cursor: pointer;
+        overflow: hidden;
+        background: #181818;
+        min-height: 250px;
       }
       .card:hover {
         border-color: #555;
+      }
+      .model-card-preview {
+        width: 100%;
+        height: 180px;
+        min-height: 180px;
+        display: block;
+        object-fit: contain;
+        background: #0e0e0e;
+        color: #aaa;
+        text-align: center;
+        line-height: 180px;
+      }
+      .model-card-info {
+        padding: 8px;
+      }
+      .model-card-name {
+        color: #fff;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .model-card-path {
+        color: #999;
+        font-size: 11px;
+        margin-top: 4px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .model-card-variant {
+        color: #75beff;
+        font-size: 11px;
+        margin-top: 3px;
+      }
+      #catalogHint {
+        padding: 8px 12px 0;
+        color: #999;
+        font-size: 12px;
       }
       .img-card {
         position: absolute;
@@ -110,6 +153,7 @@
             Done
           </button>
         </div>
+        <div id="catalogHint">Выберите модель для предпросмотра. Нажмите Done, чтобы оставить выбранную модель.</div>
         <div id="list"></div>
         <div id="stageWrap"><div id="stage"></div></div>
       </div>
