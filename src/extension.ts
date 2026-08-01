@@ -272,6 +272,16 @@ export function activate(context: vscode.ExtensionContext) {
           return;
         }
       }
+
+      const buildResult = await runCmd("npm run build");
+      if (!buildResult.ok) {
+        console.error("[anime.show] overlay build failed:", buildResult);
+        vscode.window.showErrorMessage(
+          "Не удалось собрать anime-overlay. Посмотрите консоль расширения для деталей."
+        );
+        return;
+      }
+
       // If already running, don't start another
       if (overlayChildProcess && !overlayChildProcess.killed) {
         vscode.window.showInformationMessage("Overlay уже запущен.");
@@ -284,10 +294,14 @@ export function activate(context: vscode.ExtensionContext) {
             const env = Object.assign({}, process.env) as any;
             if (env.ELECTRON_RUN_AS_NODE) delete env.ELECTRON_RUN_AS_NODE;
             env.VSCODE_PARENT_PID = String(process.pid);
-            const child = cp.spawn(cmd, args, {
+            const executable = process.platform === "win32" && cmd === "npx"
+              ? "npx.cmd"
+              : process.platform === "win32" && cmd === "npm"
+                ? "npm.cmd"
+                : cmd;
+            const child = cp.spawn(executable, args, {
               cwd: overlayPath,
               windowsHide: true,
-              shell: true,
               env,
               stdio: "ignore",
             });
@@ -306,6 +320,17 @@ export function activate(context: vscode.ExtensionContext) {
           }
         });
       };
+
+      // Try local electron binary first (node_modules/.bin/electron) to be robust in restricted PATH envs
+      const localElectronPath = path.join(overlayPath, "node_modules", ".bin", process.platform === "win32" ? "electron.cmd" : "electron");
+      try {
+        if (fs.existsSync(localElectronPath)) {
+          const spawnedLocal = await trySpawn(localElectronPath, ["."]);
+          if (spawnedLocal) return;
+        }
+      } catch (e) {
+        // ignore
+      }
 
       // Prefer spawn with npx electron . to keep a handle for later termination
       const spawned = await trySpawn("npx", ["electron", "."]);
