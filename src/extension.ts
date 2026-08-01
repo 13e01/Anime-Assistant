@@ -116,7 +116,7 @@ function getWebviewHtml(webview: vscode.Webview): string {
 function getAnimeHtml(extensionUri: vscode.Uri, webview: vscode.Webview) {
   const nonce = Date.now().toString();
   return `<!doctype html>
-    <html lang="ru">
+    <html lang="en">
     <head>
       <meta charset="utf-8" />
       <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -129,7 +129,7 @@ function getAnimeHtml(extensionUri: vscode.Uri, webview: vscode.Webview) {
       </style>
     </head>
     <body>
-      <div class="controls">Панель Live2D — модель справа внизу</div>
+      <div class="controls">Live2D panel — model at bottom-right</div>
       <div class="container">
         <div class="model-wrap" id="live2d"></div>
       </div>
@@ -149,7 +149,7 @@ function getAnimeHtml(extensionUri: vscode.Uri, webview: vscode.Webview) {
             model.y = app.renderer.height - model.height/2;
             app.stage.addChild(model);
           }catch(e){
-            const el=document.createElement('div');el.style.color='red';el.textContent='Ошибка загрузки модели';document.body.appendChild(el);
+                        const el=document.createElement('div');el.style.color='red';el.textContent='Model load error';document.body.appendChild(el);
           }
         })();
       </script>
@@ -244,7 +244,7 @@ export function activate(context: vscode.ExtensionContext) {
         });
 
       vscode.window.showInformationMessage(
-        "Пробую запустить overlay через npx electron ..."
+        "Trying to start overlay via npx electron..."
       );
       // Убедимся, что зависимости установлены (node_modules). Если нет — запустим `npm install`.
       const nodeModulesPath = path.join(overlayPath, "node_modules");
@@ -256,16 +256,16 @@ export function activate(context: vscode.ExtensionContext) {
         const installOk = await vscode.window.withProgress(
           {
             location: vscode.ProgressLocation.Notification,
-            title: "Устанавливаю зависимости для anime-overlay...",
+            title: "Installing dependencies for anime-overlay...",
             cancellable: false,
           },
           async (progress) => {
-            progress.report({ message: "Запуск npm install..." });
+            progress.report({ message: "Running npm install..." });
             const resInstall = await runCmd("npm install");
             if (!resInstall.ok) {
               console.error("[anime.show] npm install failed:", resInstall);
               vscode.window.showErrorMessage(
-                "Не удалось установить зависимости для anime-overlay. Посмотрите консоль расширения для деталей."
+                "Failed to install dependencies for anime-overlay. See the extension console for details."
               );
               return false;
             }
@@ -282,14 +282,14 @@ export function activate(context: vscode.ExtensionContext) {
       if (!buildResult.ok) {
         console.error("[anime.show] overlay build failed:", buildResult);
         vscode.window.showErrorMessage(
-          "Не удалось собрать anime-overlay. Посмотрите консоль расширения для деталей."
+          "Failed to build anime-overlay. See the extension console for details."
         );
         return;
       }
 
       // If already running, don't start another
       if (overlayChildProcess && !overlayChildProcess.killed) {
-        vscode.window.showInformationMessage("Overlay уже запущен.");
+        vscode.window.showInformationMessage("Overlay is already running.");
         return;
       }
 
@@ -397,14 +397,14 @@ export function activate(context: vscode.ExtensionContext) {
       if (spawned) return;
 
       vscode.window.showInformationMessage(
-        "npx electron не сработал — пробую npm run start ..."
+        "npx electron failed — trying npm run start..."
       );
       // Fallback: spawn npm run start
       const spawnedNpm = await trySpawn("npm", ["run", "start"]);
       if (spawnedNpm) return;
 
       vscode.window.showErrorMessage(
-        "Не удалось автоматически запустить overlay. Смотрите консоль расширения для деталей."
+        "Could not automatically start the overlay. See the extension console for details."
       );
       // Also clear handle just in case
       try {

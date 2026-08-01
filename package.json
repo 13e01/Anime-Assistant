@@ -1,7 +1,7 @@
 {
   "name": "anime-assistant",
-  "displayName": "Аниме‑ассистент",
-  "description": "Аниме‑ассистент — Live2D помощник для VS Code",
+  "displayName": "Anime-Assistant",
+  "description": "Anime-Assistant — Live2D assistant for VS Code",
   "icon": "icon.png",
   "version": "0.0.10",
   "publisher": "anime-assistant",
@@ -25,7 +25,7 @@
     "commands": [
       {
         "command": "anime.show",
-        "title": "Аниме: Показать модель"
+        "title": "Anime: Show model"
       }
     ]
   },

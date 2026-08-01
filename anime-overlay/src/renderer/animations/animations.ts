@@ -150,7 +150,7 @@ export function refreshAnimationsUI(animSelect?: HTMLSelectElement, animPlayBtn?
   if (!animSelect) return;
   const placeholder = document.createElement("option");
   placeholder.value = "";
-  placeholder.textContent = "Анимации";
+  placeholder.textContent = "Animations";
   animSelect.innerHTML = "";
   animSelect.appendChild(placeholder);
 
@@ -535,11 +535,11 @@ export function tryStartRandomMotion(preferredGroup: string) {
           try {
             if (g) {
               manager.startRandomMotion(g);
-              toast("Анимация: " + g); // Added debug toast
+              toast("Animation: " + g); // Added debug toast
               return true;
             } else {
               manager.startRandomMotion();
-              toast("Анимация: default"); // Added debug toast
+              toast("Animation: default"); // Added debug toast
               return true;
             }
           } catch (e) {}

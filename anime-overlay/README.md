@@ -1,16 +1,16 @@
-Как запустить overlay локально:
+How to run the overlay locally:
 
-1. Откройте терминал в папке `anime-overlay`.
-2. Выполните:
+1. Open a terminal in the `anime-overlay` folder.
+2. Run:
 
 ```powershell
 npm install
 npm run start
 ```
 
-Electron откроет прозрачное окно с Live2D-моделью, которое можно перетащить поверх IDE.
+Electron will open a transparent window with the Live2D model which can be kept on top of your IDE.
 
-Примечания:
+Notes:
 
-- Для упаковки/распространения нужно будет включить electron в пакет расширения или предоставить отдельный инсталлятор.
-- По умолчанию модель загружается из CDN; для офлайн-режима добавьте модель в папку `anime-overlay/media` и подключите локально.
+- For distribution you will need to include Electron in your packaged extension or provide a separate installer.
+- By default models are loaded from CDNs; for offline use place the model files under `anime-overlay/media` and update the config.

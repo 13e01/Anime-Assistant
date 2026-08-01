@@ -24,23 +24,23 @@ export function initEvents() {
           if (chars > 0) gain = Math.max(1, Math.ceil(chars / 10));
           if (gain > 0) {
             addXp(gain);
-            toast("Сохранено: +" + gain + " XP (" + chars + " chars)");
+            toast("Saved: +" + gain + " XP (" + chars + " chars)");
             speakCategory("xp");
             playRandomNonIdle();
           } else {
             // no XP for zero-chars save
-            toast("Сохранено (без XP)");
+            toast("Saved (no XP)");
           }
         } else if (data.type === "edit") {
           // edits don't grant XP until saved; just react
           saveState();
           updateUI();
-          toast("Правка");
+          toast("Edit");
           playRandomNonIdle();
           if (Math.random() < 0.1) speakCategory("fun");
         } else if (data.type === "focus") {
           focusModel();
-          toast("Фокус на файле");
+          toast("Focus on file");
         }
       } catch (e) {
         console.error("onEvent handler", e);

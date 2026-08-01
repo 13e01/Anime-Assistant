@@ -792,7 +792,7 @@ function initBackButton() {
                 style: "font-weight:600;font-size:13px;",
               }),
               el("div", {
-                textContent: "Папка",
+                textContent: "Folder",
                 style: "opacity:.8;font-size:11px;",
               }),
             ]
@@ -807,7 +807,7 @@ function initBackButton() {
         );
         div.appendChild(
           el("div", {
-            textContent: it.type === "dir" ? "Папка" : "Файл",
+            textContent: it.type === "dir" ? "Folder" : "File",
             style: "opacity:.6; font-size:12px",
           })
         );

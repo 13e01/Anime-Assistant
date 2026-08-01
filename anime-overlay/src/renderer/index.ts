@@ -92,8 +92,8 @@ if (document.getElementById("model") && document.getElementById("controls")) {
       console.error("Live2D load error", e);
       const el = document.getElementById("model");
       el.textContent =
-        "Ошибка загрузки модели: " + (e && e.message ? e.message : e);
-      // попытаться показать fallback из локальных ассетов
+        "Model load error: " + (e && e.message ? e.message : e);
+      // try to show fallback from bundled assets
       const img = document.createElement("img");
       img.style.width = "100%";
       img.style.height = "100%";

@@ -1,57 +1,57 @@
-## Anime-Assistant — Live2D ассистент для VS Code
+## Anime-Assistant — Live2D assistant for VS Code
 
-> Быстрый запуск: нажмите `Ctrl`+`Shift`+`P` (на macOS — `Cmd`+`Shift`+`P`), введите и выберите команду «Аниме: Показать модель», затем нажмите `Enter`.
+> Quick start: open the command palette (Ctrl/Cmd+Shift+P), run "Anime: Show model" and press Enter.
 
-Аниме‑помощник для повышения фокуса и вовлечённости во время разработки. Расширение добавляет:
+Anime assistant to boost focus and engagement while coding. The extension provides:
 
-- Панель с Live2D‑моделью внутри VS Code
-- Отдельное «прозрачное» окно‑оверлей на Electron, которое можно закрепить поверх IDE
-- Лёгкую геймификацию: помидоры (Pomodoro), уровень/XP, реакции на сохранения/правки/фокус файла
+- A Live2D model panel inside VS Code
+- A separate transparent Electron overlay window that can be kept on top of the IDE
+- Light gamification: Pomodoro timer, level/XP, reactions to saves/edits/focus changes
 
-Оверлей реагирует на ваши действия в редакторе (правки, сохранения, смена файла) через простой мост событий и может озвучивать фразы/воспроизводить аудио.
+The overlay reacts to editor actions (edits, saves, file focus changes) via a simple events bridge and can speak phrases or play audio.
 
-### Демо
+### Demo
 
-![Демо](./anime-overlay/public/img/demo.gif)
+![Demo](./anime-overlay/public/img/demo.gif)
 
-### Быстрый старт
+### Quick start
 
-1. Требования
+Requirements:
 
 - VS Code 1.100+
 - Node.js 18+
 
-2. Старт помощника (оверлей)
+Start the overlay:
 
-- В новом окне VS Code откройте палитру команд (Ctrl/Cmd+Shift+P) и выполните: «Аниме: Показать модель»
-- При первом запуске будут установлены зависимости в папке `anime-overlay` и стартует Electron‑окно
+- Open the command palette (Ctrl/Cmd+Shift+P) and run: "Anime: Show model"
+- On first run the extension will install dependencies in `anime-overlay` and start the Electron window
 
-Если автозапуск не сработал, см. «Ручной запуск оверлея» ниже.
+If automatic start fails, see "Manual overlay start" in `anime-overlay/README.md`.
 
-### Как пользоваться
+### Usage
 
-- Команда «Аниме: Показать модель» — запускает Electron‑оверлей с Live2D‑моделью, таймером Pomodoro и реакциями
-- Панель «Аниме: Модель» — встраиваемый вид в панели VS Code (для быстрого предпросмотра модели внутри IDE)
-- Оверлей можно перетаскивать мышью, закреплять и использовать как «кликабельный» или «сквозной» (click‑through)
-- При сохранении файлов вы получаете XP, при правках — небольшие реакции, при переключении файла — визуальная индикация фокуса
+- The "Anime: Show model" command launches the Electron overlay with a Live2D model, Pomodoro timer and reactions
+- The built-in panel provides a small preview of the model inside VS Code
+- The overlay can be dragged, pinned and toggled between clickable and click-through modes
+- Saving files grants XP; edits and focus changes trigger small reactions
 
-Откроется прозрачное окно с моделью. Его можно держать поверх VS Code.
+The overlay opens as a transparent window that can be kept on top of your IDE.
 
-### Что под капотом
+### Under the hood
 
-- Расширение следит за событиями редактора и пишет компактные JSON‑события в `anime-overlay/events.json`
-- Оверлей (`anime-overlay`) читает этот файл и отображает реакции: голос/аудио, анимации, XP и т. п.
-- Модели Live2D загружаются из публичных репозиториев (CDN); доступны Cubism2 и Cubism4
+- The extension writes compact JSON events to `anime-overlay/events.json`
+- The overlay (`anime-overlay`) reads this file to display reactions, audio and animations
+- Models are loaded from public CDNs by default (supports Cubism2 and Cubism4). For offline use, place assets locally and update the config.
 
-### Структура проекта
+### Project structure
 
-- `src/extension.ts` — код расширения: команда «Аниме: Показать модель», панель, мост событий
-- `anime-overlay/` — Electron‑приложение (оверлей) с Live2D, Pomodoro и XP
-- `anime-overlay/public/` — статика (HTML/CSS/скрипты, локальные индексы моделей, аудио‑ассеты)
+- `src/extension.ts` — extension entrypoint: command, panel, events bridge
+- `anime-overlay/` — Electron overlay app (Live2D, Pomodoro, XP)
+- `anime-overlay/public/` — static assets (HTML/CSS/JS, model indexes, audio)
 
-- Фразы и звук можно изменить в `anime-overlay/public/phrases.json` и `anime-overlay/public/audio/`
-- По умолчанию загрузка моделей и некоторых зависимостей происходит из CDN; для офлайн‑режима положите ассеты рядом и укажите локальные пути
+- Phrases and audio can be modified in `anime-overlay/public/phrases.json` and `anime-overlay/public/audio/`
+- By default models and some dependencies are loaded from CDNs; for offline use, place assets locally and update paths.
 
-### Лицензия
+### License
 
 MIT
