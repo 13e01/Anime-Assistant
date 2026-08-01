@@ -38061,7 +38061,7 @@ void main(void)\r
           if (parts.length >= 2) {
             const characterName = parts[0];
             const skinName = parts.slice(1).join("_");
-            const baseUrl = "https://codeberg.org/alesha229/nikke/raw/branch/main";
+            const baseUrl = _SpineModelLoader.NIKKE_BASE;
             const altSkelUrl = `${baseUrl}/${encodeURIComponent(characterName)}/${encodeURIComponent(skinName)}.skel`;
             const altAtlasUrl = `${baseUrl}/${encodeURIComponent(characterName)}/${encodeURIComponent(skinName)}.atlas`;
             console.log("Trying alternative URLs:", { altSkelUrl, altAtlasUrl });
@@ -38103,7 +38103,7 @@ void main(void)\r
           } else if (skinName.toLowerCase().includes("cover")) {
             subfolder = "cover/";
           }
-          const baseUrl = "https://codeberg.org/alesha229/nikke/raw/branch/main";
+          const baseUrl = _SpineModelLoader.NIKKE_BASE;
           const atlasUrl = `${baseUrl}/${encodeURIComponent(characterName)}/${subfolder}${encodeURIComponent(skinName)}.atlas`;
           const skelUrl = `${baseUrl}/${encodeURIComponent(characterName)}/${subfolder}${encodeURIComponent(skinName)}.skel`;
           const nameHint2 = skinName.toLowerCase();
@@ -38138,7 +38138,7 @@ void main(void)\r
     }
   };
   _SpineModelLoader.NIKKE_BASE = "https://nikke-db-legacy.pages.dev/l2d/";
-  _SpineModelLoader.DOTGG_BASE = "https://codeberg.org/alesha229/nikke/src/branch/main";
+  _SpineModelLoader.DOTGG_BASE = "https://nikke-db-legacy.pages.dev/l2d/";
   var SpineModelLoader = _SpineModelLoader;
 
   // src/renderer/spine/spineHeadTracking.ts
