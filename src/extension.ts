@@ -210,6 +210,8 @@ export function activate(context: vscode.ExtensionContext) {
         return;
       }
 
+      const output = vscode.window.createOutputChannel('Anime-Assistant');
+
       const runCmd = (command: string) =>
         new Promise<{
           ok: boolean;
@@ -228,6 +230,9 @@ export function activate(context: vscode.ExtensionContext) {
             command,
             { cwd: overlayPath, windowsHide: true, env },
             (error, stdout, stderr) => {
+              if (stdout) output.appendLine(`[cmd stdout] ${stdout.toString()}`);
+              if (stderr) output.appendLine(`[cmd stderr] ${stderr.toString()}`);
+              if (error) output.appendLine(`[cmd error] ${String(error)}`);
               resolve({
                 ok: !error,
                 stdout: stdout?.toString() || "",
@@ -294,39 +299,94 @@ export function activate(context: vscode.ExtensionContext) {
             const env = Object.assign({}, process.env) as any;
             if (env.ELECTRON_RUN_AS_NODE) delete env.ELECTRON_RUN_AS_NODE;
             env.VSCODE_PARENT_PID = String(process.pid);
-            const executable = process.platform === "win32" && cmd === "npx"
-              ? "npx.cmd"
-              : process.platform === "win32" && cmd === "npm"
+
+            // Normalize executable for Windows when using shell commands
+            const normalize = (c: string) =>
+              process.platform === "win32" && c === "npx"
+                ? "npx.cmd"
+                : process.platform === "win32" && c === "npm"
                 ? "npm.cmd"
-                : cmd;
+                : c;
+
+            const executable = normalize(cmd);
+
+            // Use pipes so we can capture logs for debugging under F5
             const child = cp.spawn(executable, args, {
               cwd: overlayPath,
               windowsHide: true,
               env,
-              stdio: "ignore",
+              stdio: ["ignore", "pipe", "pipe"],
             });
+
             overlayChildProcess = child;
-            const onExit = () => {
+
+            // Attach logging to the OutputChannel if available
+            try {
+              const oc = vscode.window.createOutputChannel("Anime-Assistant");
+              if (child.stdout) child.stdout.on("data", (d) => oc.appendLine(`[overlay stdout] ${d.toString()}`));
+              if (child.stderr) child.stderr.on("data", (d) => oc.appendLine(`[overlay stderr] ${d.toString()}`));
+            } catch (e) {
+              // ignore failures creating output channel
+            }
+
+            let spawnErrored = false;
+            const onError = (err?: any) => {
+              spawnErrored = true;
+              try {
+                const oc = vscode.window.createOutputChannel("Anime-Assistant");
+                oc.appendLine(`[overlay spawn error] ${String(err)}`);
+              } catch {}
               try {
                 overlayChildProcess = null;
               } catch {}
+              resolve(false);
             };
-            child.once("exit", onExit);
-            child.once("error", onExit);
-            // Assume started if no immediate error; resolve true after small delay
-            setTimeout(() => resolve(true), 200);
+
+            child.once("error", onError);
+            child.once("exit", (code, signal) => {
+              try {
+                const oc = vscode.window.createOutputChannel("Anime-Assistant");
+                oc.appendLine(`[overlay exit] code=${code} signal=${signal}`);
+              } catch {}
+              try {
+                overlayChildProcess = null;
+              } catch {}
+              if (!spawnErrored) resolve(false);
+            });
+
+            // Consider spawned successfully if no error within a short timeout
+            setTimeout(() => {
+              if (!spawnErrored) resolve(true);
+            }, 800);
           } catch (e) {
+            try {
+              const oc = vscode.window.createOutputChannel("Anime-Assistant");
+              oc.appendLine(`[trySpawn exception] ${String(e)}`);
+            } catch {}
             resolve(false);
           }
         });
       };
 
-      // Try local electron binary first (node_modules/.bin/electron) to be robust in restricted PATH envs
-      const localElectronPath = path.join(overlayPath, "node_modules", ".bin", process.platform === "win32" ? "electron.cmd" : "electron");
+      // Try local electron binary first (node_modules/.bin/electron or electron/dist) to be robust in restricted PATH envs
+      const localBin = path.join(overlayPath, "node_modules", ".bin", process.platform === "win32" ? "electron.cmd" : "electron");
+      const electronDist = process.platform === "win32"
+        ? path.join(overlayPath, "node_modules", "electron", "dist", "electron.exe")
+        : path.join(overlayPath, "node_modules", "electron", "dist", "electron");
+
       try {
-        if (fs.existsSync(localElectronPath)) {
-          const spawnedLocal = await trySpawn(localElectronPath, ["."]);
+        if (fs.existsSync(localBin)) {
+          const spawnedLocal = await trySpawn(localBin, ["."]);
           if (spawnedLocal) return;
+        }
+      } catch (e) {
+        // ignore
+      }
+
+      try {
+        if (fs.existsSync(electronDist)) {
+          const spawnedDist = await trySpawn(electronDist, ["."]);
+          if (spawnedDist) return;
         }
       } catch (e) {
         // ignore
