@@ -196,93 +196,14 @@ export function activate(context: vscode.ExtensionContext) {
   subscriptions.push(
     vscode.commands.registerCommand("anime.show", async () => {
       const overlayPath = path.join(context.extensionPath, "anime-overlay");
-      // path to events file used for simple IPC between extension and overlay
-      const eventsPath = path.join(overlayPath, "events.json");
-      const pkgPath = path.join(overlayPath, "package.json");
+  const mainPath = path.join(overlayPath, "dist", "main.js");
       const exists = await fs.promises
-        .stat(pkgPath)
+        .stat(mainPath)
         .then(() => true)
         .catch(() => false);
       if (!exists) {
         vscode.window.showErrorMessage(
-          'anime-overlay не найден. Убедитесь, что папка "anime-overlay" присутствует в расширении.'
-        );
-        return;
-      }
-
-      const output = vscode.window.createOutputChannel('Anime-Assistant');
-
-      const runCmd = (command: string) =>
-        new Promise<{
-          ok: boolean;
-          stdout: string;
-          stderr: string;
-          error?: any;
-        }>((resolve) => {
-          // copy env and remove ELECTRON_RUN_AS_NODE which VS Code can set
-          const env = Object.assign({}, process.env) as any;
-          if (env.ELECTRON_RUN_AS_NODE) delete env.ELECTRON_RUN_AS_NODE;
-          try {
-            env.VSCODE_PARENT_PID = String(process.pid);
-          } catch {}
-
-          cp.exec(
-            command,
-            { cwd: overlayPath, windowsHide: true, env },
-            (error, stdout, stderr) => {
-              if (stdout) output.appendLine(`[cmd stdout] ${stdout.toString()}`);
-              if (stderr) output.appendLine(`[cmd stderr] ${stderr.toString()}`);
-              if (error) output.appendLine(`[cmd error] ${String(error)}`);
-              resolve({
-                ok: !error,
-                stdout: stdout?.toString() || "",
-                stderr: stderr?.toString() || "",
-                error,
-              });
-            }
-          );
-        });
-
-      vscode.window.showInformationMessage(
-        "Trying to start overlay via npx electron..."
-      );
-      // Убедимся, что зависимости установлены (node_modules). Если нет — запустим `npm install`.
-      const nodeModulesPath = path.join(overlayPath, "node_modules");
-      const hasNodeModules = await fs.promises
-        .stat(nodeModulesPath)
-        .then(() => true)
-        .catch(() => false);
-      if (!hasNodeModules) {
-        const installOk = await vscode.window.withProgress(
-          {
-            location: vscode.ProgressLocation.Notification,
-            title: "Installing dependencies for anime-overlay...",
-            cancellable: false,
-          },
-          async (progress) => {
-            progress.report({ message: "Running npm install..." });
-            const resInstall = await runCmd("npm install");
-            if (!resInstall.ok) {
-              console.error("[anime.show] npm install failed:", resInstall);
-              vscode.window.showErrorMessage(
-                "Failed to install dependencies for anime-overlay. See the extension console for details."
-              );
-              return false;
-            }
-            return true;
-          }
-        );
-
-        if (!installOk) {
-          return;
-        }
-      }
-
-      const buildResult = await runCmd("npm run build");
-      if (!buildResult.ok) {
-        console.error("[anime.show] overlay build failed:", buildResult);
-        vscode.window.showErrorMessage(
-          "Failed to build anime-overlay. See the extension console for details."
+          "Anime overlay is missing from this extension package."
         );
         return;
       }

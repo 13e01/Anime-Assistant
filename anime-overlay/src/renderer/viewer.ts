@@ -562,21 +562,13 @@ function initBackButton() {
   initBackButton();
 
   // --- Catalog (index) logic ---
-  const INDEX_URL =
-    "https://guansss.github.io/live2d-viewer-web/eikanyalive2d-model.json";
   const pathMap: Record<string, any> = {};
   let currentPath = "";
-  type RepoKey = "eikanya" | "st";
+  type RepoKey = "st";
   const REPOS: Record<
     RepoKey,
     { type: "index"; owner: string; repo: string; ref: string }
   > = {
-    eikanya: {
-      type: "index",
-      owner: "Eikanya",
-      repo: "Live2d-model",
-      ref: "master",
-    },
     st: {
       type: "index",
       owner: "test157t",
@@ -584,14 +576,7 @@ function initBackButton() {
       ref: "main",
     },
   };
-  let currentRepo: RepoKey = ((): RepoKey => {
-    try {
-      const v = localStorage.getItem("viewer_repo") as RepoKey | null;
-      return v === "st" || v === "eikanya" ? v : "eikanya";
-    } catch {
-      return "eikanya";
-    }
-  })();
+  const currentRepo: RepoKey = "st";
   function activeRepo() {
     return REPOS[currentRepo];
   }
@@ -1043,7 +1028,7 @@ function initBackButton() {
     infoMap: Record<string, any>
   ) {
     const key =
-      (pathMap[""]?.name || "Eikanya/Live2d-model") + "/" + repoMocPath;
+      (pathMap[""]?.name || "test157t/Live2dModels-ST-") + "/" + repoMocPath;
     const meta = infoMap[key] || {};
     const dir = repoMocPath.replace(/\/?[^/]*$/, "");
     const modelUrl = await resolveModelUrl(repoMocPath);
@@ -1099,15 +1084,7 @@ function initBackButton() {
     try {
       const d = decodeURI(u);
       let m = d.match(
-        /cdn\.jsdelivr\.net\/gh\/Eikanya\/Live2d-model@[^/]+\/(.+)$/
-      );
-      if (m) return m[1];
-      m = d.match(
-        /raw\.githubusercontent\.com\/Eikanya\/Live2d-model\/[^/]+\/(.+)$/
-      );
-      if (m) return m[1];
-      m = d.match(
-        /cdn\.jsdelivr\.net\/gh\/test157t\/Live2dModels-ST-@[^/]+\/(.+)$/
+      /cdn\.jsdelivr\.net\/gh\/test157t\/Live2dModels-ST-@[^/]+\/(.+)$/
       );
       if (m) return m[1];
       m = d.match(
@@ -1279,32 +1256,6 @@ function initBackButton() {
     listEntries(currentPath);
   }
 
-  // Repo selector UI
-  try {
-    const toolbar = document.getElementById("toolbar");
-    if (toolbar) {
-      const repoSel = el("select", { style: "margin-right:8px;" });
-      repoSel.appendChild(
-        el("option", { value: "eikanya", textContent: "Eikanya (indexed)" })
-      );
-      repoSel.appendChild(
-        el("option", { value: "st", textContent: "Live2dModels-ST- (indexed)" })
-      );
-      (repoSel as HTMLSelectElement).value = currentRepo;
-      (repoSel as HTMLSelectElement).onchange = async () => {
-        try {
-          currentRepo =
-            ((repoSel as HTMLSelectElement).value as RepoKey) || "eikanya";
-          localStorage.setItem("viewer_repo", currentRepo);
-          for (const k of Object.keys(pathMap)) delete pathMap[k];
-          await loadRepoRoot();
-          openPath("");
-        } catch {}
-      };
-      toolbar.insertBefore(repoSel, toolbar.firstChild);
-    }
-  } catch {}
-
   // Index-only mode; no GitHub API calls needed
   async function ensureNodeLoaded(_path: string) {
     // no-op; full tree comes from local index
@@ -1313,20 +1264,13 @@ function initBackButton() {
     try {
       // choose bundled local index file by repo
       const repo = activeRepo();
-      const localIndexName =
-        repo.owner === "Eikanya"
-          ? "eikanyalive2d-model.json"
-          : "Live2dModels-ST-.json";
+      const localIndexName = "Live2dModels-ST-.json";
       const localUrl = `./index/${localIndexName}`;
       let data: any = null;
       try {
         const r = await fetch(localUrl, { cache: "no-cache" });
         if (r.ok) data = await r.json();
       } catch {}
-      if (!data && repo.owner === "Eikanya") {
-        const resp = await fetch(INDEX_URL);
-        data = await resp.json();
-      }
       if (data) {
         const root = data.models || data;
         (function build(node: any, p: string) {

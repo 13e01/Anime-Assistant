@@ -23,9 +23,9 @@ function createWindow() {
   const area = (primary && (primary as any).workArea) ||
     (primary as any).bounds || { width: 1920, height: 1080, x: 0, y: 0 };
   const winW = 360;
-  const winH = 640;
+  const winH = 560;
   const x = (area as any).x + (area as any).width - winW;
-  const y = (area as any).y + (area as any).height - winH;
+  const y = (area as any).y + Math.max(0, ((area as any).height - winH) / 2);
 
   mainWindow = new BrowserWindow({
     width: winW,
@@ -193,8 +193,15 @@ ipcMain.handle("overlay-toggle-click-through", (_e, enabled: boolean) => {
 ipcMain.on("overlay-enter-fullscreen", () => {
   if (!mainWindow) return;
   try { initialBounds = mainWindow.getBounds(); } catch {}
-  const { workArea } = screen.getPrimaryDisplay();   // ← берём рабочую область
-  mainWindow.setBounds(workArea, false);             // на весь экран без панели
+  const { workArea } = screen.getPrimaryDisplay();
+  const pickerWidth = Math.min(1120, Math.max(760, workArea.width - 80));
+  const pickerHeight = Math.min(780, Math.max(620, workArea.height - 100));
+  mainWindow.setBounds({
+    x: workArea.x + Math.round((workArea.width - pickerWidth) / 2),
+    y: workArea.y + Math.round((workArea.height - pickerHeight) / 2),
+    width: pickerWidth,
+    height: pickerHeight,
+  }, false);
 });
 
 ipcMain.on("overlay-exit-fullscreen", () => {

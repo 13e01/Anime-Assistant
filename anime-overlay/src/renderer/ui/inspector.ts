@@ -3,7 +3,7 @@ import { encodeRepoPath, buildRepoPath, ping } from "../../utils/utils";
 import { loadSelectedModel } from "../live2d/live2dLoader";
 
 const INDEX_URL =
-  "https://guansss.github.io/live2d-viewer-web/eikanyalive2d-model.json";
+  "https://raw.githubusercontent.com/test157t/Live2dModels-ST-/main/index.json";
 let modelIndexRoot: any = null;
 let modelInfoMap: any = null;
 let indexPathMap: any = {};
@@ -34,7 +34,7 @@ export async function ensureIndexLoaded() {
 
 function indexRootName() {
   return (
-    (modelIndexRoot && modelIndexRoot.name) || "Eikanya/Live2d-model"
+    (modelIndexRoot && modelIndexRoot.name) || "test157t/Live2dModels-ST-"
   );
 }
 
@@ -54,7 +54,7 @@ function pathToJsDelivr(repoPath: string, ref?: string) {
   const encoded = encodeRepoPath(repoPath);
   const suffix = ref ? "@" + ref : "";
   return (
-    "https://cdn.jsdelivr.net/gh/Eikanya/Live2d-model" +
+    "https://cdn.jsdelivr.net/gh/test157t/Live2dModels-ST-" +
     suffix +
     "/" +
     encoded
@@ -65,7 +65,7 @@ function pathToRaw(repoPath: string, ref?: string) {
   const encoded = encodeRepoPath(repoPath);
   const branch = ref || "master";
   return (
-    "https://raw.githubusercontent.com/Eikanya/Live2d-model/" +
+    "https://raw.githubusercontent.com/test157t/Live2dModels-ST-/" +
     branch +
     "/" +
     encoded

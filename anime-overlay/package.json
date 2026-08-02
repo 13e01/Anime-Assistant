@@ -10,11 +10,7 @@
     "dev": "concurrently \"node esbuild.config.mjs --watch\" \"wait-on dist/main.js && electron .\""
   },
   "dependencies": {
-    "@esotericsoftware/spine-phaser": "~4.1.31",
-    "@pixi-spine/all-4.0": "^4.0.6",
-    "@pixi-spine/all-4.1": "^4.0.6",
     "electron": "^26.0.0",
-    "phaser": "3.60.0",
     "pixi.js": "7.4.3"
   },
   "devDependencies": {

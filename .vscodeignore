@@ -13,3 +13,5 @@ anime-overlay/tsconfig.json
 anime-overlay/tsconfig.node.json
 anime-overlay/tsconfig.app.json
 anime-overlay/tsconfig.spec.json
+anime-overlay/esbuild.config.mjs
+anime-overlay/node_modules/.cache/**

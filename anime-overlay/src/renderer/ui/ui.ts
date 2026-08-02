@@ -6,22 +6,10 @@ import { setVoiceEnabled, setVoiceMode, getVoiceMode } from "../voice/voice";
 import { getModel } from "../modelStore";
 
 export function initUI() {
-  const MODELS = config.MODELS;
   const LAST_MODEL_KEY = config.LAST_MODEL_KEY;
 
   const controls = document.getElementById("controls");
   if (!controls) return;
-
-  // Model Select
-  const select = document.createElement("select");
-  select.style.webkitAppRegion = "no-drag";
-  MODELS.forEach((url: string, i: number) => {
-    const opt = document.createElement("option");
-    opt.value = url;
-    opt.textContent = `Model ${i + 1}`;
-    select.appendChild(opt);
-  });
-  controls.insertBefore(select, controls.firstChild);
 
   // Inspector Button
   const openInspectorBtn = document.createElement("button");
@@ -33,7 +21,6 @@ export function initUI() {
     try {
       current = localStorage.getItem(LAST_MODEL_KEY) || "";
     } catch {}
-    if (!current) current = select.value || "";
     try {
       localStorage.setItem(LAST_MODEL_KEY, current);
     } catch {}
@@ -42,17 +29,7 @@ export function initUI() {
     } catch {}
     window.location.href = `viewer.html`;
   });
-  controls.insertBefore(openInspectorBtn, select);
-
-  // Spine Viewer Button
-  const spineviewerbtn = document.createElement("button");
-  spineviewerbtn.textContent = "spine viewer";
-  spineviewerbtn.style.webkitAppRegion = "no-drag";
-  spineviewerbtn.className = "btn";
-  spineviewerbtn.addEventListener("click", () => {
-    window.location.href = `spine.html`;
-  });
-  controls.insertBefore(spineviewerbtn, openInspectorBtn);
+  controls.insertBefore(openInspectorBtn, controls.firstChild);
 
   // Animation Controls
   const animSelect = document.createElement("select");
@@ -100,22 +77,18 @@ export function initUI() {
   });
 
   // UI Visibility Toggle
-  const toggleUIBtn = document.getElementById("toggleUI");
-  const showUIBtn = document.getElementById("showUIBtn");
   const UI_HIDDEN_KEY = "anime_overlay_ui_hidden_v1";
   const controlsWrap = controls;
 
   function setUIHidden(hidden: boolean) {
     try {
-      if (!controlsWrap || !showUIBtn) return;
+      if (!controlsWrap) return;
 
       if (hidden) {
         controlsWrap.classList.add("hidden");
-        showUIBtn.classList.remove("hidden");
         localStorage.setItem(UI_HIDDEN_KEY, "1");
       } else {
         controlsWrap.classList.remove("hidden");
-        showUIBtn.classList.add("hidden");
         localStorage.setItem(UI_HIDDEN_KEY, "0");
       }
 
@@ -130,34 +103,11 @@ export function initUI() {
     setUIHidden(saved === "1");
   } catch {}
 
-  try {
-    if (toggleUIBtn)
-      toggleUIBtn.addEventListener("click", () => {
-        const hidden =
-          controlsWrap && controlsWrap.classList.contains("hidden");
-        setUIHidden(!hidden);
-      });
-
-    if (showUIBtn)
-      showUIBtn.addEventListener(
-        "click",
-        () => setUIHidden(false)
-      );
-  } catch {}
-
-  function sendBounds() {
-    if (!showUIBtn) return;
-    const b = showUIBtn.getBoundingClientRect();
-    window.overlayAPI?.reportPinBounds({
-      x: b.left,
-      y: b.top,
-      w: b.width,
-      h: b.height,
-    });
-  }
-  window.overlayAPI?.onRequestBounds(() => sendBounds());
-  window.addEventListener("resize", sendBounds);
-  window.addEventListener("DOMContentLoaded", sendBounds);
+  window.addEventListener("keydown", (event) => {
+    if (!event.ctrlKey || event.code !== "BracketRight") return;
+    event.preventDefault();
+    setUIHidden(!controlsWrap.classList.contains("hidden"));
+  });
 
   // Opacity Input
   const opacityInput = document.getElementById("opacity");
@@ -188,5 +138,5 @@ export function initUI() {
     });
   }
 
-  return { animSelect, animPlayBtn, select };
+  return { animSelect, animPlayBtn };
 }

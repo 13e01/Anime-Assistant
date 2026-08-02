@@ -4,16 +4,16 @@
   "description": "Anime-Assistant — Live2D assistant for VS Code",
   "icon": "icon.png",
   "version": "0.0.10",
-  "publisher": "anime-assistant",
-  "private": true,
+  "publisher": "13e01",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/13e01/Anime-Assistant"
   },
   "bugs": {
-    "url": ""
+    "url": "https://github.com/13e01/Anime-Assistant/issues"
   },
+  "homepage": "https://github.com/13e01/Anime-Assistant#readme",
   "engines": {
     "vscode": "^1.100.0"
   },
@@ -27,11 +27,20 @@
         "command": "anime.show",
         "title": "Anime: Show model"
       }
+    ],
+    "keybindings": [
+      {
+        "command": "anime.show",
+        "key": "ctrl+alt+a",
+        "mac": "cmd+alt+a"
+      }
     ]
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "npm run compile && npm run prepare:overlay && npm run build:overlay",
     "compile": "tsc -p ./",
+    "prepare:overlay": "npm --prefix anime-overlay install --omit=optional",
+    "build:overlay": "npm --prefix anime-overlay run build",
     "lint": "eslint",
     "watch": "tsc -watch -p ./"
   },

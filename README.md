@@ -19,14 +19,13 @@ The overlay reacts to editor actions (edits, saves, file focus changes) via a si
 Requirements:
 
 - VS Code 1.100+
-- Node.js 18+
 
 Start the overlay:
 
-- Open the command palette (Ctrl/Cmd+Shift+P) and run: "Anime: Show model"
-- On first run the extension will install dependencies in `anime-overlay` and start the Electron window
-
-If automatic start fails, see "Manual overlay start" in `anime-overlay/README.md`.
+- Press `Ctrl+Alt+A` (`Cmd+Alt+A` on macOS), or open the command palette
+  (`Ctrl/Cmd+Shift+P`) and run "Anime: Show model".
+- The published extension includes the overlay runtime; no Node.js installation
+  or terminal commands are required.
 
 ### Usage
 
