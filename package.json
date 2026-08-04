@@ -1,7 +1,7 @@
 {
   "name": "anime-assistant",
   "displayName": "Anime-Assistant",
-  "description": "Anime-Assistant — Live2D assistant for VS Code",
+  "description": "Anime-Assistant — Live2D assistant inside VS Code",
   "icon": "icon.png",
   "version": "0.0.10",
   "publisher": "13e01",
@@ -17,15 +17,29 @@
   "engines": {
     "vscode": "^1.100.0"
   },
-  "categories": [
-    "Other"
-  ],
+  "categories": ["Other"],
   "main": "./out/extension.js",
+  "activationEvents": [
+    
+    
+    "onStartupFinished"
+  ],
   "contributes": {
     "commands": [
       {
         "command": "anime.show",
-        "title": "Anime: Show model"
+        "title": "Anime: Show Assistant Panel",
+        "icon": "$(play)"
+      },
+      {
+        "command": "anime.openTab",
+        "title": "Anime: Open Assistant in New Tab",
+        "icon": "$(layout-sidebar-right-off)"
+      },
+      {
+        "command": "anime.openCleanTab",
+        "title": "Anime: Open Pure Model View",
+        "icon": "$(symbol-color)"
       }
     ],
     "keybindings": [
@@ -34,18 +48,60 @@
         "key": "ctrl+alt+a",
         "mac": "cmd+alt+a"
       }
-    ]
+    ],
+    "views": {
+      "explorer": [
+        {
+          "type": "webview",
+          "id": "animeView",
+          "name": "Anime Assistant",
+          "when": "true",
+          "icon": "icon.png"
+        },
+        {
+          "type": "webview",
+          "id": "animeCleanView",
+          "name": "Anime Model",
+          "when": "true",
+          "icon": "icon.png"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Anime Assistant",
+      "properties": {
+        "animeAssistant.pomodoroWorkMinutes": {
+          "type": "number",
+          "default": 25,
+          "minimum": 1,
+          "maximum": 120,
+          "description": "Pomodoro work interval (minutes)"
+        },
+        "animeAssistant.pomodoroBreakMinutes": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "maximum": 60,
+          "description": "Pomodoro break interval (minutes)"
+        },
+        "animeAssistant.voiceEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable voice reactions"
+        },
+        "animeAssistant.extraModelsDir": {
+          "type": "string",
+          "default": "",
+          "description": "Absolute path to an additional folder containing Live2D models (*.model3.json / *.model.json). Leave empty to use only the built-in models."
+        }
+      }
+    }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile && npm run prepare:overlay && npm run build:overlay",
+    "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
-    "prepare:overlay": "npm --prefix anime-overlay install --omit=optional",
-    "build:overlay": "npm --prefix anime-overlay run build",
     "lint": "eslint",
     "watch": "tsc -watch -p ./"
-  },
-  "dependencies": {
-    "cowsay": "^1.6.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.13.0",
